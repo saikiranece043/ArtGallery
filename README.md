@@ -1,5 +1,5 @@
 # ArtGallery
-This is an NP-HARD problem solved using Genetic Algorithm
+This is an NP-HARD problem solved using Genetic Algorithm and Wisdom of Crowds
 
 
 The problem is to find a minimum number of guards to monitor all the art placed in a polygon shaped space. This is classified as NP-HARD and we are here to develop a solution which is nearly perfect. This can be applied for a complex orthogonal convex polygon or a regular convex polygon.
