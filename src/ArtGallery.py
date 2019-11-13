@@ -330,11 +330,24 @@ This function creates generations from the functions defined above and same time
 '''
 def geneticalgo(i):
     print(ga.pop)
-
+    finalsol=[]
     sys.stdout.write("\rGeneration %i" % i)
+
     sys.stdout.flush()
+
+    if i == 50:
+        print("Have run 50 generations so qutting")
+        plt.savefig('output')
+        plt.close(fig)
+        sys.exit(0)
+
     currentpop,currenttop = nextgen(ga.pop, elitesize)
     ga.set_pop(currentpop)
+    for idx,x in enumerate(currenttop):
+        if x==1:
+            finalsol.append(idx)
+    print("Guards should be placed on the vertices ",finalsol)
+
     plots=list.copy(coord)
     plots.append(plots[0])
     ax1.clear()
