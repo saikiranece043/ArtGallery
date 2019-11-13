@@ -16,7 +16,8 @@ class GA:
         self.maxguards = math.floor(self.noofvertices/3)
         self.pop = self.initialPop()
 
-
+    def set_pop(self, pop):
+        self.pop = list.copy(pop)
 
     def initialPop(self):
         print("Initial population of individuals")
