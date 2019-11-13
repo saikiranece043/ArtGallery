@@ -7,6 +7,12 @@ import random
     r guards placed on the reflex vertices of Q are always sufficient and occasionally necessary to guard Q
 '''
 
+'''
+This is a class to represent a genetic algorithm or atleast some aspects of it
+Constructor with mandatory args reflex vertices and vertices (array of point objects)
+'''
+
+
 class GA:
 
 

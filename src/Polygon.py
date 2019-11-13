@@ -1,3 +1,9 @@
+'''
+A class to represent a ploygon wit attributes as vertices (collection of point objects)
+The methods getreflex vertices would help us to calculate the convex vertices in the polygon
+getArea is  to calc area of the polygon
+calcdist is to calc distance between 2 points
+'''
 
 from src.Point import *
 import math

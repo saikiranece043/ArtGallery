@@ -1,3 +1,8 @@
+
+'''
+This function is to generate the coordinates of a polygon which is more of an input to our art gallery problem
+'''
+
 import math, random
 
 def generatePolygon( ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts ) :

@@ -1,5 +1,6 @@
-from src.Point import *
-import math
+'''
+A Simple Class to represent a 2d point with an x and y coordinate
+'''
 
 class Point:
 

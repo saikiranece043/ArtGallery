@@ -1,6 +1,8 @@
 # Returns 1 if the lines intersect, otherwise 0. In addition, if the lines
 # intersect the intersection point may be stored in the floats i_x and i_y.
-
+'''
+This function is to check if a line segment(p1,p2) intersects with a line segment (p3,p4)
+'''
 
 def get_line_intersection(p1, p2, p3, p4):
     xslope1 = p2.x - p1.x

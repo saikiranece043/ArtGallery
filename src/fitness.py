@@ -1,5 +1,9 @@
 from src.ArtGallery import *
 
+
+'''
+Not used this function anywhere in the application so please ignore
+'''
 def common_member(a, b):
     a_set = set(a)
     b_set = set(b)
