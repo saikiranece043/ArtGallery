@@ -11,7 +11,7 @@ import time
 import matplotlib.animation as ani
 from matplotlib import style
 import sys
-
+import time
 
 # point 1 and point 2 are the indexes in coords
 # point 1 and 2 are the endpoints of line segment (i.e line joining reflex vertice and one of the triangulated ploygon vertice )
@@ -120,38 +120,70 @@ def matingpool(population,selectedParents):
     return matingPool
 
 
+'''
+crossover -- Takes the dna from the top parent, elitesize bits of top parent and concatenate with the parent from bottom pop for remaining bits
+'''
+
+def crossover1(matingpool,elitesize):
+     children=[]
+     print(matingpool)
+     tguards = matingpool[0].count(1)
+     for i in range(0,elitesize):
+         children.append(matingpool[i])
+
+     for i in range(elitesize,len(matingpool)):
+
+
+         #print("before crossover %s %s"%(matingpool[0][:4],matingpool[i][4:]))
+         if matingpool[0][:elitesize].count(1)+ matingpool[0][elitesize:].count(1) != tguards:
+             print("the number of guards generated on crossover is not equal to the parent")
+
+
+         individual= matingpool[0][:elitesize]+matingpool[i][elitesize:]
+         #print("indvidual after cross over: %d %s  " %(len(individual),individual))
+         children.append(individual)
+
+     #print("children",children)
+     return children
+
+'''
+Mutation is performed on one random indvidual which isn't part of the elite size
+Mutation would remove a guard from an individual and only adds the individual if its unique indv in the population
+'''
+
 #crossover on the bottom half i.e individuals that are not part of the elizeSize
-def crossover(matingpool,elitesize):
-    children =[]
+def mutation(children,elitesize):
 
-    for i in range(0,elitesize):
-        children.append(matingpool[i])
-
-    for i in range(elitesize,len(reflexvertices)):
-        loop =0
-
+    randomchild = random.randint(elitesize, len(children) - 1)
+    indv = children[randomchild]
+    tmp = list.copy(children[randomchild])
+    loop =0
         #this loop is to ensure the indviduals added as children are unique
-        while True:
-            loop = loop+1
-            if loop == 1000:
+    while True:
+        loop = loop+1
+        if loop == 1000:
                 print("couldn't generate a unique individual in the population with guards",indv.count(1))
                 break
-            choice = random.choice(reflexvertices)
-            choice1= random.choice(reflexvertices)
-            randomparent=random.randint(elitesize,len(matingpool)-1)
-            indv = matingpool[randomparent]
-
-            if indv[choice] == 1 and indv.count(1) > len(reflexvertices)/5:
+        choice = random.choice(reflexvertices)
+        choice1= random.choice(reflexvertices)
+        if indv[choice] == 1 and indv.count(1) > len(reflexvertices)/5:
+                print("before mutation",indv.count(1),indv)
                 indv[choice] = 0
+                print("after mutation",indv.count(1),indv)
 
-            if indv[choice] == 0 and indv.count(1) < len(reflexvertices)/5:
+        if indv[choice] == 0 and indv.count(1) < len(reflexvertices)/5:
                 indv[choice] == 0
                 indv[choice1] == 1
 
-            if indv not in children:
-                children.append(indv)
-                break
+        if indv not in children:
+             children.append(indv)
+             children.remove(tmp)
+             break
+        else:
+            indv = tmp
 
+
+    #print("After mutation",children)
     return children
 
 
@@ -165,7 +197,8 @@ def nextgen(population,elitesize):
     print("No of guards in the top rank of the population", matingPool[0].count(1),matingPool[0])
     #print("selected parents",matingPool)
     time.sleep(1)
-    nextgen = crossover(matingPool,elitesize)
+    children = crossover1(matingPool,elitesize)
+    nextgen = mutation(children,elitesize)
     #print(rankindv(nextgen))
     #print(len(rankindv(nextgen)))
     #print("size of nextgen",len(nextgen))
@@ -224,8 +257,8 @@ Generating the coordinates of the ploygon
 '''
 # coord = [[1,1], [3,10], [1,40], [2,80],[12,100], [12,15],[40,10]]
 
-#coord = [(596, 133), (616, 207), (661, 181), (612, 284), (671, 236), (657, 269), (726, 263), (664, 289), (735, 318),(706, 347), (738, 389), (709, 401), (628, 338), (651, 396), (646, 477), (609, 383), (599, 421), (586, 386),(529, 450), (565, 349), (454, 436), (522, 343), (474, 326), (458, 313), (493, 282), (519, 269), (528, 245),(527, 217), (535, 207), (591, 274)]
-coord=generatePolygon(800,800,600,0.35,0.4,100)
+coord = [(596, 133), (616, 207), (661, 181), (612, 284), (671, 236), (657, 269), (726, 263), (664, 289), (735, 318),(706, 347), (738, 389), (709, 401), (628, 338), (651, 396), (646, 477), (609, 383), (599, 421), (586, 386),(529, 450), (565, 349), (454, 436), (522, 343), (474, 326), (458, 313), (493, 282), (519, 269), (528, 245),(527, 217), (535, 207), (591, 274)]
+#coord=generatePolygon(800,800,600,0.6,0.2,100)
 # print(coord)
 #traingles = [((591, 274), (596, 133), (616, 207)), ((616, 207), (661, 181), (612, 284)), ((612, 284), (671, 236), (657, 269)), ((657, 269), (726, 263), (664, 289)), ((664, 289), (735, 318), (706, 347)), ((706, 347), (738, 389), (709, 401)), ((706, 347), (709, 401), (628, 338)), ((628, 338), (651, 396), (646, 477)), ((628, 338), (646, 477), (609, 383)), ((609, 383), (599, 421), (586, 386)), ((586, 386), (529, 450), (565, 349)), ((565, 349), (454, 436), (522, 343)), ((522, 343), (474, 326), (458, 313)), ((522, 343), (458, 313), (493, 282)), ((522, 343), (493, 282), (519, 269)), ((528, 245), (527, 217), (535, 207)), ((528, 245), (535, 207), (591, 274)), ((591, 274), (616, 207), (612, 284)), ((612, 284), (657, 269), (664, 289)), ((664, 289), (706, 347), (628, 338)), ((628, 338), (609, 383), (586, 386)), ((628, 338), (586, 386), (565, 349)), ((565, 349), (522, 343), (519, 269)), ((565, 349), (519, 269), (528, 245)), ((565, 349), (528, 245), (591, 274)), ((565, 349), (591, 274), (612, 284)), ((612, 284), (664, 289), (628, 338)), ((612, 284), (628, 338), (565, 349))]
 
@@ -327,6 +360,7 @@ ax1= fig.add_subplot(1,1,1)
 '''
 This function is invoked by the animation object repeatedly (unfortunately only way to plot dynamically using pyplot)
 This function creates generations from the functions defined above and same time updates the plots based on the values in each generation
+The Plot dynamically updates for every generation and represents the top individual 
 '''
 def geneticalgo(i):
     print(ga.pop)
@@ -336,8 +370,8 @@ def geneticalgo(i):
     sys.stdout.flush()
 
     if i == 50:
-        print("Have run 50 generations so qutting")
-        plt.savefig('output')
+        print("Have run 5 generations so qutting")
+        plt.savefig('output'+str(i))
         plt.close(fig)
         sys.exit(0)
 
