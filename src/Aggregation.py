@@ -7,3 +7,4 @@ Find vertices that 66% of them agree on
 Add remaining vertices from list of vertices with largest field of vision
 '''
 
+

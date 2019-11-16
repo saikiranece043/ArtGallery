@@ -48,7 +48,7 @@ class Polygon:
         reflexvertices =[]
 
 
-        print("no of reflex vertices in the polygon")
+        #print("no of reflex vertices in the polygon")
         for index in range(0,len(self.vertices)):
             if index == 0:
                 A = self.vertices[index]
@@ -72,7 +72,7 @@ class Polygon:
             num = (b*b+c*c)- (a*a)
             den = 2*b*c
             angle = math.degrees(math.acos(num/den))
-            print("Angle %f %s" %(angle,index))
+            #print("Angle %f %s" %(angle,index))
             if angle > 180 :
                 reflexvertices.append(index)
 

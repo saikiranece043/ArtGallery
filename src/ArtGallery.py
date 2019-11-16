@@ -13,6 +13,7 @@ from matplotlib import style
 import sys
 import time
 
+
 # point 1 and point 2 are the indexes in coords
 # point 1 and 2 are the endpoints of line segment (i.e line joining reflex vertice and one of the triangulated ploygon vertice )
 # this function checks if a line segments cuts the polygon or not
@@ -84,7 +85,7 @@ def fitness(indv):
                 totalvisbility= totalvisbility + dictvis[index]
         totalvisbility = list(dict.fromkeys(totalvisbility))
         #print("visibility of an indvidual %s %s" % (indv, len(totalvisbility)))
-        return (len(totalvisbility)/len(traingles)) * (len(indv)-indv.count(1))
+        return (len(totalvisbility)/len(traingles)) *100
 
 
 #this function to rank the indviduals in the population as per the fitness values
@@ -93,12 +94,20 @@ def rankindv(population):
     fitnessresults = {}
 
     for idx,indv in enumerate(population):
-        fitnessresults[idx] = fitness(indv)
-
+        fit=fitness(indv)
+        if fit == 100:
+           fitnessresults[idx] = fit + (len(indv)-indv.count(1))
+        else:
+            fitnessresults[idx] = fit
     #print(fitnessresults)
     return sorted(fitnessresults.items(),key=operator.itemgetter(1),reverse=True)
 
 
+
+'''
+We can use different methods of selection tournament or roulette wheel
+For this experiment we choose tournament Selection 
+'''
 #Selecting the top parents indexes as per the fitness values
 def selectedParents(rankedpop):
     selectedParents =[]
@@ -120,13 +129,18 @@ def matingpool(population,selectedParents):
     return matingPool
 
 
+
+
+
+
 '''
-crossover -- Takes the dna from the top parent, elitesize bits of top parent and concatenate with the parent from bottom pop for remaining bits
+Single Point crossover -- Takes the dna from the top parent, elitesize bits of top parent and concatenate with the parent from bottom pop for remaining bits
+A crossover point on the parent organism string is selected. All data beyond that point in the organism string is swapped between the two parent organisms. 
 '''
 
 def crossover1(matingpool,elitesize):
      children=[]
-     print(matingpool)
+     #print(matingpool)
      tguards = matingpool[0].count(1)
      for i in range(0,elitesize):
          children.append(matingpool[i])
@@ -147,62 +161,220 @@ def crossover1(matingpool,elitesize):
      return children
 
 '''
+Uniform crossover
+Each gene (bit) is selected randomly from one of the corresponding genes of the parent chromosomes.
+'''
+
+
+def crossover2(matingpool,elitesize):
+    children = []
+    #print(matingpool)
+    tguards = matingpool[0].count(1)
+    for i in range(0, elitesize):
+        children.append(matingpool[i])
+
+    for i in range(elitesize, len(matingpool)):
+        choice = random.randint(0,elitesize)
+        # print("before crossover %s %s"%(matingpool[0][:4],matingpool[i][4:]))
+        if matingpool[0][:elitesize].count(1) + matingpool[0][elitesize:].count(1) != tguards:
+            print("the number of guards generated on crossover is not equal to the parent")
+        indv = matingpool[i]
+        #position of the guard placed in the parent
+        indexofguardp = indv.index(1)
+        #position of the guard placed in the eliteparent
+        indexofguardep = matingpool[choice].index(1)
+
+        if indv[indexofguardep] == 0:
+            indv[indexofguardep] = 1
+            indv[indexofguardp] = 0
+            children.append(indv)
+        else:
+            children.append(indv)
+        # print("indvidual after cross over: %d %s  " %(len(individual),individual))
+
+
+    # print("children",children)
+    return children
+
+'''
 Mutation is performed on one random indvidual which isn't part of the elite size
-Mutation would remove a guard from an individual and only adds the individual if its unique indv in the population
+Mutation would remove a guard from an individual and only adds the updated individual to the population only if its unique indv in the population
+The job is very simple it just flips the bits but critical as it's the only way to reduce the number of guards from the population
 '''
 
 #crossover on the bottom half i.e individuals that are not part of the elizeSize
 def mutation(children,elitesize):
 
-    randomchild = random.randint(elitesize, len(children) - 1)
+    randomchild = random.randint(1, elitesize)
+    #randomchild2=random.randint(elitesize,len(children)-1)
     indv = children[randomchild]
-    tmp = list.copy(children[randomchild])
-    loop =0
+    #indv2= children[randomchild2]
+    children.remove(indv)
+    #children.remove(indv2)
+    #tmp = list.copy(children[randomchild])
+    #loop =0
         #this loop is to ensure the indviduals added as children are unique
-    while True:
-        loop = loop+1
-        if loop == 1000:
-                print("couldn't generate a unique individual in the population with guards",indv.count(1))
-                break
-        choice = random.choice(reflexvertices)
-        choice1= random.choice(reflexvertices)
-        if indv[choice] == 1 and indv.count(1) > len(reflexvertices)/5:
-                print("before mutation",indv.count(1),indv)
-                indv[choice] = 0
-                print("after mutation",indv.count(1),indv)
+    # while True:
+    #     loop = loop+1
+    #     if loop == 1000:
+    #             print("couldn't generate a unique individual in the population with guards",indv.count(1))
+    #             break
+    choice = random.choice(reflexvertices)
+    #choice1= random.choice(reflexvertices)
+    if indv[choice] == 1:
+            #print("performed mutation")
+                #print("before mutation",indv.count(1),indv)
+            indv[choice] = 0
+                #print("after mutation",indv.count(1),indv)
 
-        if indv[choice] == 0 and indv.count(1) < len(reflexvertices)/5:
-                indv[choice] == 0
-                indv[choice1] == 1
+        # if indv[choice] == 0 and indv.count(1) < len(reflexvertices)/10:
+        #         indv[choice] == 0
+        #         indv[choice1] == 1
 
-        if indv not in children:
-             children.append(indv)
-             children.remove(tmp)
-             break
-        else:
-            indv = tmp
+    #if indv2[choice] ==1:
+    #   indv2[choice] =0
+    # if indv not in children:
+    #          print("mutation performed")
+    children.append(indv)
+    #children.append(indv2)
+    #children.remove(tmp)
+             #break
+    # else:
+    #         indv = tmp
 
 
     #print("After mutation",children)
     return children
 
 
+'''
+Aggregation of the results from the results of genetic algorithm in each generation
+If the indviduals agree on 80% of the placement of guards then we retain the guard position
+The other positions we shall fill by finding the min guards to co
+'''
+
+
 #This function is to generate children from the initial population retaining the elite size of parents
 def nextgen(population,elitesize):
     #print(population)
-    print("ranked individuals",rankindv(population))
+    #print("ranked individuals",rankindv(population))
     #print("No of guards in the top rank of the population", population[rankindv(population)][0].count(1))
     sp=selectedParents(rankindv(population))
     matingPool= matingpool(population,sp)
+    #print("agreement from the individuals on the pop",aggreg(matingPool))
     print("No of guards in the top rank of the population", matingPool[0].count(1),matingPool[0])
     #print("selected parents",matingPool)
     time.sleep(1)
     children = crossover1(matingPool,elitesize)
     nextgen = mutation(children,elitesize)
+
     #print(rankindv(nextgen))
     #print(len(rankindv(nextgen)))
     #print("size of nextgen",len(nextgen))
     return nextgen,matingPool[0]
+
+
+
+def aggreg(population,i):
+    agreement =[0]*len(population[0])
+    print(agreement)
+    for vertice in reflexvertices:
+        for indv in population:
+            if indv[vertice] == 1:
+                agreement[vertice] = agreement[vertice]+1
+
+    for vertice in reflexvertices:
+        if agreement[vertice] < len(population) * 0.80:
+            agreement[vertice] = 2
+        else:
+            agreement[vertice] = 1
+
+
+
+    while fitness(agreement)<100:
+        vis=[]
+        #print("Agreement array",agreement)
+        #print("visibility dict",dictvis)
+        for idx,vertice in enumerate(agreement):
+            if vertice == 1:
+                vis=vis+dictvis[idx]
+        vis = list(dict.fromkeys(vis))
+        #print("visibility of the aggregated individual",vis)
+        notvis = list(set(trianglep).difference(vis))
+        #print("not visible traingle for the aggregated solution",notvis)
+        tdict={}
+        for t in notvis:
+           tdict[t]=trainglefromvertices(t)
+
+        #print("Non visibile Traingles that can be seen by the list of vertices",tdict,len(tdict))
+
+
+        final={}
+        for idx,vertice in enumerate(agreement):
+            if vertice ==2:
+                trai= set(notvis).difference(dictvis[idx])
+                final[idx] = len(trai)
+
+        finalsort=sorted(final.items(), key = operator.itemgetter(1), reverse = False)
+        #print("the number of unseen traingles that other reflex vertices can see ",finalsort)
+
+        agreement[finalsort[0][0]]=1
+
+    # comprehensivelist=[]
+    # triangleslist=[]
+    # for key in tdict:
+    #     comprehensivelist = comprehensivelist+list(tdict[key])
+    #     triangleslist = triangleslist + list(key)
+    #
+    # print("List of traingles ",triangleslist)
+    #
+    # while not triangleslist:
+    #     mostcommon=max(set(comprehensivelist),key=comprehensivelist.count)
+    #     print("most common vertice that can see the triangles",mostcommon)
+    #     print("Triangles this most common vertice can see is",dictvis[mostcommon])
+    #     for t in dictvis[mostcommon]:
+    #         if t in triangleslist:
+    #            triangleslist.remove(t)
+
+    #comprehensivelist.remove(mostcommon)
+
+    for idx,vertice in enumerate(agreement):
+        if vertice == 2:
+            agreement[idx]=0
+
+
+
+
+
+    if fitness(agreement) >= 100:
+        print("Fitness of the crowd %d and number of guards %d in generation %s"%(fitness(agreement),agreement.count(1),agreement))
+        return agreement
+
+
+
+
+    # solution = [0]*len(population[0])
+    # notvis =[]
+    # vis=[]
+    # for vertice in reflexvertices:
+    #     if agreement[vertice]==1:
+    #         notvis=notvis+dictvis[vertice]
+    #     else:
+    #         vis= vis+ dictvis[vertice]
+
+    #print("Visible traingles for the aggregated result",len(dict.fromkeys(vis)),list(dict.fromkeys(vis)))
+
+
+
+
+def trainglefromvertices(t):
+    trvfv=[]
+    for k in dictvis:
+        if t in dictvis[k]:
+            trvfv.append(k)
+    return trvfv
+
+
 
 
 #This is a draw function that is not currently used , purely used for testing
@@ -257,11 +429,11 @@ Generating the coordinates of the ploygon
 '''
 # coord = [[1,1], [3,10], [1,40], [2,80],[12,100], [12,15],[40,10]]
 
-coord = [(596, 133), (616, 207), (661, 181), (612, 284), (671, 236), (657, 269), (726, 263), (664, 289), (735, 318),(706, 347), (738, 389), (709, 401), (628, 338), (651, 396), (646, 477), (609, 383), (599, 421), (586, 386),(529, 450), (565, 349), (454, 436), (522, 343), (474, 326), (458, 313), (493, 282), (519, 269), (528, 245),(527, 217), (535, 207), (591, 274)]
-#coord=generatePolygon(800,800,600,0.6,0.2,100)
+#coord = [(596, 133), (616, 207), (661, 181), (612, 284), (671, 236), (657, 269), (726, 263), (664, 289), (735, 318),(706, 347), (738, 389), (709, 401), (628, 338), (651, 396), (646, 477), (609, 383), (599, 421), (586, 386),(529, 450), (565, 349), (454, 436), (522, 343), (474, 326), (458, 313), (493, 282), (519, 269), (528, 245),(527, 217), (535, 207), (591, 274)]
+coord=generatePolygon(800,800,600,0.6,0.2,100)
 # print(coord)
 #traingles = [((591, 274), (596, 133), (616, 207)), ((616, 207), (661, 181), (612, 284)), ((612, 284), (671, 236), (657, 269)), ((657, 269), (726, 263), (664, 289)), ((664, 289), (735, 318), (706, 347)), ((706, 347), (738, 389), (709, 401)), ((706, 347), (709, 401), (628, 338)), ((628, 338), (651, 396), (646, 477)), ((628, 338), (646, 477), (609, 383)), ((609, 383), (599, 421), (586, 386)), ((586, 386), (529, 450), (565, 349)), ((565, 349), (454, 436), (522, 343)), ((522, 343), (474, 326), (458, 313)), ((522, 343), (458, 313), (493, 282)), ((522, 343), (493, 282), (519, 269)), ((528, 245), (527, 217), (535, 207)), ((528, 245), (535, 207), (591, 274)), ((591, 274), (616, 207), (612, 284)), ((612, 284), (657, 269), (664, 289)), ((664, 289), (706, 347), (628, 338)), ((628, 338), (609, 383), (586, 386)), ((628, 338), (586, 386), (565, 349)), ((565, 349), (522, 343), (519, 269)), ((565, 349), (519, 269), (528, 245)), ((565, 349), (528, 245), (591, 274)), ((565, 349), (591, 274), (612, 284)), ((612, 284), (664, 289), (628, 338)), ((612, 284), (628, 338), (565, 349))]
-
+#print(coord)
 
 
 '''
@@ -326,7 +498,7 @@ Visbility details for each vertice is stored in a global dictionary variable
 dictvis=storevisibility()
 #pop=[]
 
-print(dictvis)
+#print(dictvis)
 
 
 '''
@@ -355,7 +527,7 @@ style.use('ggplot')
 fig = plt.figure()
 ax1= fig.add_subplot(1,1,1)
 
-
+progress=[]
 
 '''
 This function is invoked by the animation object repeatedly (unfortunately only way to plot dynamically using pyplot)
@@ -363,24 +535,24 @@ This function creates generations from the functions defined above and same time
 The Plot dynamically updates for every generation and represents the top individual 
 '''
 def geneticalgo(i):
-    print(ga.pop)
+    #print(ga.pop)
     finalsol=[]
     sys.stdout.write("\rGeneration %i" % i)
-
+    aggreg(ga.pop,i)
     sys.stdout.flush()
 
-    if i == 50:
-        print("Have run 5 generations so qutting")
+    if i == 200:
+        #print("Have run 5 generations so qutting")
         plt.savefig('output'+str(i))
         plt.close(fig)
-        sys.exit(0)
 
     currentpop,currenttop = nextgen(ga.pop, elitesize)
+    progress.append(currenttop.count(1))
     ga.set_pop(currentpop)
     for idx,x in enumerate(currenttop):
         if x==1:
             finalsol.append(idx)
-    print("Guards should be placed on the vertices ",finalsol)
+    #print("Guards should be placed on the vertices ",finalsol)
 
     plots=list.copy(coord)
     plots.append(plots[0])
@@ -401,13 +573,17 @@ def geneticalgo(i):
 
 
 
-a = ani.FuncAnimation(fig,geneticalgo,interval=1000)
+a = ani.FuncAnimation(fig,geneticalgo,interval=1)
 
-
+print(time.time())
 plt.show()
 #geneticalgo(pop,4,400000)
 
-
-
-
+print(time.time())
+#plt.close(fig)
+print(progress)
+plt.plot(progress)
+plt.ylabel('NoofGuards')
+plt.xlabel('Generation')
+plt.show()
 #drawpolygon(coord)

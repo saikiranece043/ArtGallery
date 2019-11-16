@@ -26,10 +26,10 @@ class GA:
         self.pop = list.copy(pop)
 
     def initialPop(self):
-        print("Initial population of individuals")
-        print("No of reflex vertices %d hence going to generate individuals"%(len(self.reflexvertices)))
-        print("The length of an individual would be no of vertices of the polygon i.e ",self.noofvertices)
-        print("Maximum number of guards required for the gallery is ",self.maxguards)
+        #print("Initial population of individuals")
+        #print("No of reflex vertices %d hence going to generate individuals"%(len(self.reflexvertices)))
+        #print("The length of an individual would be no of vertices of the polygon i.e ",self.noofvertices)
+        #print("Maximum number of guards required for the gallery is ",self.maxguards)
         pop = []
 
         for index in range(0,len(self.reflexvertices)):
